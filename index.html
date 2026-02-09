@@ -29,6 +29,52 @@
         .progress-bar {
             transition: width 0.5s ease-in-out;
         }
+
+        /* Character Animations */
+        @keyframes wave {
+            0% { transform: rotate(0deg); }
+            10% { transform: rotate(14deg); }
+            20% { transform: rotate(-8deg); }
+            30% { transform: rotate(14deg); }
+            40% { transform: rotate(-4deg); }
+            50% { transform: rotate(10deg); }
+            60% { transform: rotate(0deg); }
+            100% { transform: rotate(0deg); }
+        }
+        .animate-wave {
+            animation: wave 2s infinite;
+            transform-origin: 70% 70%;
+            display: inline-block;
+        }
+
+        @keyframes hop {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-20px); }
+        }
+        .animate-hop {
+            animation: hop 0.6s infinite ease-in-out alternate;
+            display: inline-block;
+        }
+
+        @keyframes think {
+            0% { transform: scale(1) rotate(0deg); }
+            50% { transform: scale(1.1) rotate(5deg); }
+            100% { transform: scale(1) rotate(0deg); }
+        }
+        .animate-think {
+            animation: think 2.5s infinite ease-in-out;
+            display: inline-block;
+        }
+
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+            100% { transform: translateY(0px); }
+        }
+        .animate-float {
+            animation: float 3s infinite ease-in-out;
+            display: inline-block;
+        }
     </style>
 <script type="importmap">
 {
@@ -118,7 +164,8 @@
                 desc: "당신은 긍정 에너지 뿜뿜! 주변을 환하게 밝히는 인간 비타민입니다.<br>감수성이 풍부하고 공감 능력이 뛰어나 친구들에게 인기가 많아요.<br>논리보다는 마음이 시키는 대로 움직일 때 더 행복함을 느끼는 당신!",
                 emoji: "🐰",
                 color: "pink",
-                tags: ["#파워긍정", "#리액션부자", "#감성충만", "#핵인싸"]
+                tags: ["#파워긍정", "#리액션부자", "#감성충만", "#핵인싸"],
+                anim: "animate-hop"
             },
             TETO: {
                 title: "스마트한 테토녀",
@@ -126,7 +173,8 @@
                 desc: "당신은 논리와 이성의 결정체! 차가운 도시 여자 같지만 내 사람에겐 따뜻하죠.<br>효율성을 중시하고 문제 해결 능력이 탁월합니다.<br>감정에 휩쓸리기보다 팩트를 기반으로 현명한 판단을 내리는 뇌섹녀!",
                 emoji: "🦊",
                 color: "cyan",
-                tags: ["#논리왕", "#효율중시", "#팩트폭격", "#스마트"]
+                tags: ["#논리왕", "#효율중시", "#팩트폭격", "#스마트"],
+                anim: "animate-think"
             },
             HYBRID: {
                 title: "완벽한 밸런스 하이브리드",
@@ -134,7 +182,8 @@
                 desc: "따뜻한 가슴과 차가운 머리를 동시에 가진 당신!<br>상황에 따라 유연하게 대처하는 능력이 뛰어납니다.<br>공감할 땐 공감하고, 분석할 땐 분석하는 당신은 이 구역의 진정한 능력자!",
                 emoji: "🦄",
                 color: "purple",
-                tags: ["#반전매력", "#유연함", "#황금밸런스", "#멀티플레이어"]
+                tags: ["#반전매력", "#유연함", "#황금밸런스", "#멀티플레이어"],
+                anim: "animate-float"
             }
         };
 
@@ -146,13 +195,31 @@
 
         const app = document.getElementById('app');
 
+        // --- HELPER FUNCTIONS ---
+        function getResultData() {
+            const total = QUESTIONS.length;
+            const egenPercent = Math.round((currentState.scores.A / total) * 100);
+            const tetoPercent = Math.round((currentState.scores.B / total) * 100);
+
+            let type = 'HYBRID';
+            if (egenPercent >= 70) type = 'EGEN';
+            else if (tetoPercent >= 70) type = 'TETO';
+
+            return { ...RESULTS[type], type, egenPercent, tetoPercent };
+        }
+
         // --- RENDER FUNCTIONS ---
 
         function renderWelcome() {
             app.innerHTML = `
                 <div class="fade-in flex flex-col items-center justify-center h-full text-center">
                     <div class="bg-white/60 backdrop-blur-md p-8 rounded-[2rem] shadow-xl border border-white w-full">
-                        <div class="text-7xl mb-6 animate-bounce cursor-default">✨</div>
+                        
+                        <div class="flex justify-center gap-4 mb-6">
+                            <div class="text-6xl animate-wave origin-bottom-right cursor-default">🐰</div>
+                            <div class="text-6xl animate-float cursor-default" style="animation-delay: 0.5s">🦊</div>
+                        </div>
+
                         <h1 class="font-display text-4xl mb-2 text-slate-800 break-keep">
                             <span class="text-pink-500">에겐녀</span> VS <span class="text-cyan-600">테토녀</span>
                         </h1>
@@ -214,14 +281,14 @@
 
                     <!-- Answers -->
                     <div class="space-y-4 flex-1">
-                        <button onclick="handleAnswer('A')" class="w-full p-5 text-left bg-white rounded-2xl shadow-sm border-2 border-transparent hover:border-pink-300 hover:bg-pink-50 transition-all duration-200 group scale-button">
+                        <button onclick="handleAnswer('A', this)" class="w-full p-5 text-left bg-white rounded-2xl shadow-sm border-2 border-transparent hover:border-pink-300 hover:bg-pink-50 transition-all duration-200 group scale-button">
                             <div class="flex items-start gap-3">
                                 <span class="bg-pink-100 text-pink-600 text-sm font-bold px-2.5 py-1 rounded-lg shrink-0 group-hover:bg-pink-200">A</span>
                                 <span class="text-slate-700 font-medium leading-relaxed text-sm sm:text-base">${question.A}</span>
                             </div>
                         </button>
 
-                        <button onclick="handleAnswer('B')" class="w-full p-5 text-left bg-white rounded-2xl shadow-sm border-2 border-transparent hover:border-cyan-300 hover:bg-cyan-50 transition-all duration-200 group scale-button">
+                        <button onclick="handleAnswer('B', this)" class="w-full p-5 text-left bg-white rounded-2xl shadow-sm border-2 border-transparent hover:border-cyan-300 hover:bg-cyan-50 transition-all duration-200 group scale-button">
                             <div class="flex items-start gap-3">
                                 <span class="bg-cyan-100 text-cyan-600 text-sm font-bold px-2.5 py-1 rounded-lg shrink-0 group-hover:bg-cyan-200">B</span>
                                 <span class="text-slate-700 font-medium leading-relaxed text-sm sm:text-base">${question.B}</span>
@@ -233,27 +300,18 @@
         }
 
         function renderResult() {
-            const total = QUESTIONS.length;
-            const egenPercent = Math.round((currentState.scores.A / total) * 100);
-            const tetoPercent = Math.round((currentState.scores.B / total) * 100);
-
-            let type = 'HYBRID';
-            if (egenPercent >= 70) type = 'EGEN';
-            else if (tetoPercent >= 70) type = 'TETO';
-
-            const data = RESULTS[type];
+            const data = getResultData();
 
             // Colors based on result
-            let bgClass = type === 'EGEN' ? 'bg-pink-50' : (type === 'TETO' ? 'bg-cyan-50' : 'bg-purple-50');
-            let textClass = type === 'EGEN' ? 'text-pink-500' : (type === 'TETO' ? 'text-cyan-600' : 'text-purple-500');
-            let barBg = type === 'EGEN' ? 'bg-pink-400' : (type === 'TETO' ? 'bg-cyan-500' : 'bg-purple-400');
+            let bgClass = data.type === 'EGEN' ? 'bg-pink-50' : (data.type === 'TETO' ? 'bg-cyan-50' : 'bg-purple-50');
+            let textClass = data.type === 'EGEN' ? 'text-pink-500' : (data.type === 'TETO' ? 'text-cyan-600' : 'text-purple-500');
 
             app.innerHTML = `
                 <div class="fade-in w-full pb-8">
                     <div class="bg-white rounded-[2.5rem] shadow-2xl overflow-hidden border-4 border-white">
                         <!-- Result Header -->
                         <div class="p-10 text-center ${bgClass} relative">
-                            <div class="text-8xl mb-4 transform hover:scale-110 transition-transform duration-300 cursor-default inline-block">
+                            <div class="text-8xl mb-4 ${data.anim} cursor-default inline-block">
                                 ${data.emoji}
                             </div>
                             <p class="text-sm font-bold tracking-wider text-slate-500 mb-1 uppercase">${data.subtitle}</p>
@@ -276,26 +334,26 @@
                                 <div>
                                     <div class="flex justify-between text-xs font-bold mb-1.5">
                                         <span class="text-pink-500 flex items-center gap-1">🐰 에겐력</span>
-                                        <span class="text-pink-500">${egenPercent}%</span>
+                                        <span class="text-pink-500">${data.egenPercent}%</span>
                                     </div>
                                     <div class="h-3 bg-white rounded-full overflow-hidden shadow-inner">
-                                        <div class="h-full bg-pink-400 rounded-full transition-all duration-1000" style="width: ${egenPercent}%"></div>
+                                        <div class="h-full bg-pink-400 rounded-full transition-all duration-1000" style="width: ${data.egenPercent}%"></div>
                                     </div>
                                 </div>
                                 <div>
                                     <div class="flex justify-between text-xs font-bold mb-1.5">
                                         <span class="text-cyan-600 flex items-center gap-1">🦊 테토력</span>
-                                        <span class="text-cyan-600">${tetoPercent}%</span>
+                                        <span class="text-cyan-600">${data.tetoPercent}%</span>
                                     </div>
                                     <div class="h-3 bg-white rounded-full overflow-hidden shadow-inner">
-                                        <div class="h-full bg-cyan-500 rounded-full transition-all duration-1000" style="width: ${tetoPercent}%"></div>
+                                        <div class="h-full bg-cyan-500 rounded-full transition-all duration-1000" style="width: ${data.tetoPercent}%"></div>
                                     </div>
                                 </div>
                             </div>
 
                             <!-- Buttons -->
                             <div class="grid gap-3">
-                                <button onclick="shareResult('${data.title}')" class="flex items-center justify-center gap-2 w-full bg-slate-800 text-white font-bold py-4 rounded-2xl shadow-lg hover:bg-slate-700 transition-all scale-button">
+                                <button onclick="handleShare()" class="flex items-center justify-center gap-2 w-full bg-slate-800 text-white font-bold py-4 rounded-2xl shadow-lg hover:bg-slate-700 transition-all scale-button">
                                     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" x2="12" y1="2" y2="15"/></svg>
                                     결과 공유하기
                                 </button>
@@ -317,7 +375,38 @@
             renderQuestion();
         }
 
-        function handleAnswer(choice) {
+        async function handleAnswer(choice, btnElement) {
+            // Prevent double clicks if disabled
+            if (btnElement.disabled) return;
+
+            // Disable all buttons immediately to prevent multiple submissions
+            const allButtons = app.querySelectorAll('button');
+            allButtons.forEach(btn => {
+                btn.disabled = true;
+                btn.classList.add('opacity-60', 'cursor-not-allowed');
+                // Remove hover effects
+                btn.classList.remove('hover:bg-pink-50', 'hover:border-pink-300', 'hover:bg-cyan-50', 'hover:border-cyan-300', 'hover:scale-110');
+            });
+
+            // Restore opacity for clicked button but keep disabled
+            btnElement.classList.remove('opacity-60');
+
+            // Add loading animation to the clicked button
+            const loadingColor = choice === 'A' ? 'border-t-pink-500' : 'border-t-cyan-500';
+            const loadingText = choice === 'A' ? 'text-pink-500' : 'text-cyan-600';
+            
+            // Preserve height during loading
+            btnElement.innerHTML = `
+                <div class="flex items-center justify-center gap-3 py-1">
+                    <div class="animate-spin rounded-full h-5 w-5 border-2 border-slate-200 ${loadingColor}"></div>
+                    <span class="${loadingText} font-bold text-sm">기록 중...</span>
+                </div>
+            `;
+
+            // Wait for 600ms to show the animation
+            await new Promise(resolve => setTimeout(resolve, 600));
+
+            // Update State
             currentState.scores[choice]++;
             currentState.step++;
 
@@ -333,27 +422,30 @@
             renderWelcome();
         }
 
-        async function shareResult(resultTitle) {
-            const url = window.location.href;
-            const text = `[에겐녀 vs 테토녀 테스트]\n나의 결과는: ${resultTitle}!\n\n테스트 하러가기 👇`;
+        // --- SHARE FUNCTIONS ---
+
+        async function handleShare() {
+            const data = getResultData();
+            // Remove HTML tags for plain text sharing
+            const plainDesc = data.desc.replace(/<br>/g, ' ').replace(/<[^>]*>/g, '');
+            const shareData = {
+                title: '에겐녀 vs 테토녀 성향 테스트',
+                text: `[에겐녀 vs 테토녀 테스트]\n나의 결과는: ${data.title}!\n\n${plainDesc}\n\n테스트 하러가기 👇`,
+                url: window.location.href
+            };
 
             if (navigator.share) {
                 try {
-                    await navigator.share({
-                        title: '에겐녀 vs 테토녀 테스트',
-                        text: text,
-                        url: url
-                    });
+                    await navigator.share(shareData);
                 } catch (err) {
                     console.log('Share canceled');
                 }
             } else {
-                // Fallback for desktop/unsupported browsers
                 try {
-                    await navigator.clipboard.writeText(`${text}\n${url}`);
-                    alert('결과 링크가 복사되었습니다! 친구들에게 공유해보세요 💌');
+                    await navigator.clipboard.writeText(`${shareData.text}\n${shareData.url}`);
+                    alert('결과와 링크가 복사되었습니다! 💌\n원하는 곳에 붙여넣기하세요.');
                 } catch (err) {
-                    alert('링크 복사에 실패했습니다 🥲');
+                    alert('공유하기를 실패했습니다. URL을 직접 복사해주세요.');
                 }
             }
         }
