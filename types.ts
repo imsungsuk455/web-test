@@ -18,6 +18,7 @@ export interface ResultData {
   bgClass: string;
   barColor: string;
   traits: string[];
+  animation: string; // Animation class name
 }
 
 export interface AppState {

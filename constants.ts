@@ -93,6 +93,7 @@ export const RESULTS: Record<PersonalityType, ResultData> = {
     bgClass: "bg-pink-100",
     barColor: "bg-pink-400",
     traits: ["#파워긍정", "#리액션부자", "#감성충만", "#핵인싸"],
+    animation: "animate-hop",
   },
   TETO: {
     type: 'TETO',
@@ -103,6 +104,7 @@ export const RESULTS: Record<PersonalityType, ResultData> = {
     bgClass: "bg-cyan-100",
     barColor: "bg-cyan-500",
     traits: ["#논리왕", "#효율중시", "#팩트폭격", "#스마트"],
+    animation: "animate-think",
   },
   HYBRID: {
     type: 'HYBRID',
@@ -113,5 +115,6 @@ export const RESULTS: Record<PersonalityType, ResultData> = {
     bgClass: "bg-purple-100",
     barColor: "bg-purple-400",
     traits: ["#반전매력", "#유연함", "#황금밸런스", "#멀티플레이어"],
+    animation: "animate-float",
   },
 };
